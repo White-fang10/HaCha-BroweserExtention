@@ -1,11 +1,15 @@
 import { SelectionState } from "./selection-state.js";
 import { SelectionOverlay } from "./selection-overlay.js";
+import { captureSelection } from "./selection-capture.js";
+import { preprocessForOCR } from "../ocr/image-preprocessor.js";
+import { ocrManager } from "../ocr/ocr-manager.js";
+import { OCRConfirmationPanel } from "../ui/ocr-confirmation.js";
 
 export class SelectionManager {
     private state: SelectionState;
     private overlay: SelectionOverlay | null = null;
-    
-    // Bind event handlers so they can be removed properly
+
+    // Bound handlers for clean removal
     private handlePointerDown = this.onPointerDown.bind(this);
     private handlePointerMove = this.onPointerMove.bind(this);
     private handlePointerUp = this.onPointerUp.bind(this);
@@ -20,23 +24,19 @@ export class SelectionManager {
             console.log("[HaCha][Selection] Already active, ignoring start request.");
             return;
         }
-        
+
         console.log("[HaCha][Selection] Starting selection mode");
         this.state.setState("SELECTING");
-        
+
         this.overlay = new SelectionOverlay();
         this.overlay.attach();
 
-        // We listen on the overlay host element to capture pointer events globally
         const host = this.overlay.getHostElement();
         host.addEventListener("pointerdown", this.handlePointerDown);
         host.addEventListener("pointermove", this.handlePointerMove);
         host.addEventListener("pointerup", this.handlePointerUp);
-        
-        // Keydown should be global to catch ESC
         document.addEventListener("keydown", this.handleKeyDown);
-        
-        // Prevent default scrolling and interactions on the host
+
         host.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
         host.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
     }
@@ -65,55 +65,85 @@ export class SelectionManager {
 
     private onPointerDown(e: PointerEvent) {
         if (this.state.getState() !== "SELECTING") return;
-        
-        // Only accept primary button (usually left click)
         if (e.button !== 0) return;
-        
+
         this.state.startDrawing(e.clientX, e.clientY);
-        
-        // Capture pointer to ensure we get events even if the pointer leaves the element or window
-        if (this.overlay) {
-            this.overlay.getHostElement().setPointerCapture(e.pointerId);
-            this.overlay.updateCutout(this.state.getSelectionRect());
-        }
+        this.overlay?.getHostElement().setPointerCapture(e.pointerId);
+        this.overlay?.updateCutout(this.state.getSelectionRect());
     }
 
     private onPointerMove(e: PointerEvent) {
         if (this.state.getState() !== "DRAWING") return;
-        
+
         this.state.updateDrawing(e.clientX, e.clientY);
-        
-        if (this.overlay) {
-            this.overlay.updateCutout(this.state.getSelectionRect());
-        }
+        this.overlay?.updateCutout(this.state.getSelectionRect());
     }
 
-    private onPointerUp(e: PointerEvent) {
+    private async onPointerUp(e: PointerEvent) {
         if (this.state.getState() !== "DRAWING") return;
-        
-        if (this.overlay) {
-            this.overlay.getHostElement().releasePointerCapture(e.pointerId);
-        }
+
+        this.overlay?.getHostElement().releasePointerCapture(e.pointerId);
 
         const valid = this.state.finishDrawing();
-        if (valid) {
-            console.log("[HaCha][Selection] Selection finalized", this.state.getSelectionRect());
-            if (this.overlay) {
-                this.overlay.setInstruction("Region selected (Phase 3 will handle OCR). <span class='key'>ESC</span> to exit.");
-            }
-        } else {
+        if (!valid) {
             console.log("[HaCha][Selection] Selection too small, resetting");
-            if (this.overlay) {
-                this.overlay.clearCutout();
-                // We show an error temporarily then revert back to instructions
-                const prevHTML = this.overlay['instructionBar'].innerHTML;
-                this.overlay.setInstruction("<span style='color: #f87171;'>Selection too small, try again.</span>");
-                setTimeout(() => {
-                    if (this.state.getState() === "SELECTING" && this.overlay) {
-                        this.overlay['instructionBar'].innerHTML = prevHTML;
-                    }
-                }, 2000);
-            }
+            this.overlay?.clearCutout();
+            this.overlay?.setInstruction("Selection too small — drag a larger area.");
+            setTimeout(() => {
+                if (this.state.getState() === "SELECTING" && this.overlay) {
+                    this.overlay.setInstruction("Drag to select a claim. ESC to cancel.");
+                }
+            }, 2000);
+            return;
+        }
+
+        const rect = this.state.getSelectionRect();
+        console.log("[HaCha][Selection] Selection finalized", rect);
+
+        // Remove the selection overlay before capturing the screenshot so it doesn't
+        // appear in the captured image
+        this.cleanup();
+
+        // Start the OCR pipeline
+        await this.runOCRPipeline(rect);
+    }
+
+    private async runOCRPipeline(rect: import("../../shared/types.js").SelectionRect) {
+        try {
+            // 1. Capture the selected region from a tab screenshot
+            console.log("[HaCha][OCR] Capturing selection...");
+            const rawCanvas = await captureSelection(rect);
+
+            // 2. Preprocess the image for better OCR results
+            const processedCanvas = preprocessForOCR(rawCanvas);
+
+            // 3. Run Tesseract OCR (client-side only — image never leaves the browser)
+            const ocrResult = await ocrManager.recognize(processedCanvas);
+
+            // 4. Show confirmation panel for the user to review/edit
+            const panel = new OCRConfirmationPanel(ocrResult, (action, confirmedText) => {
+                if (action === "verify") {
+                    console.log("[HaCha] Claim confirmed for verification:", confirmedText);
+                    // Phase 4 will send confirmedText to the backend here
+                } else if (action === "select-again") {
+                    // Restart the selection flow
+                    this.state.setState("INACTIVE");
+                    this.start();
+                }
+            });
+            panel.attach();
+
+        } catch (err) {
+            console.error("[HaCha][OCR] Pipeline error:", err);
+            // Show a simple error notification
+            const errorHost = document.createElement("div");
+            errorHost.style.cssText = "position:fixed;top:20px;right:20px;background:#7f1d1d;color:#fca5a5;padding:14px 18px;border-radius:8px;font-family:sans-serif;font-size:14px;z-index:2147483647;";
+            errorHost.textContent = err instanceof Error ? err.message : "OCR failed. Please try again.";
+            document.body.appendChild(errorHost);
+            setTimeout(() => errorHost.parentNode?.removeChild(errorHost), 5000);
+
+            // Allow retrying
+            this.state.setState("INACTIVE");
         }
     }
 

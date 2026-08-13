@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "HaCha AI Fact Checker Chrome Extension",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "copyfiles -u 3 \"node_modules/tesseract.js/dist/worker.min.js\" dist/ && copyfiles -u 3 \"node_modules/tesseract.js/dist/tesseract.esm.min.js\" dist/",
     "watch": "tsc -w"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.263",
     "copyfiles": "^2.4.1",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "tesseract.js": "^7.0.0"
   }
 }

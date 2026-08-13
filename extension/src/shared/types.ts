@@ -14,3 +14,13 @@ export interface SelectionRect {
     viewportWidth: number;
     viewportHeight: number;
 }
+
+export interface OCRResult {
+    text: string;
+    confidence: number;
+    language: string;
+    processingTimeMs: number;
+    characterCount: number;
+    wordCount: number;
+    source: "local-tesseract";
+}
