@@ -1,0 +1,16 @@
+node_modules/
+__pycache__/
+.venv/
+venv/
+.env
+.env.local
+*.log
+dist/
+build/
+coverage/
+.vscode/
+.idea/
+*.pem
+*.key
+secrets/
+credentials/

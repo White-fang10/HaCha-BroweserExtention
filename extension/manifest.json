@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "HaCha AI Fact Checker",
+  "version": "1.0",
+  "description": "Real-time fact checking with local OCR and AI.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "dist/background/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "public/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/content/content.js"]
+    }
+  ]
+}

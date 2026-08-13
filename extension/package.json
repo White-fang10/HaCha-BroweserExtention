@@ -1,0 +1,13 @@
+{
+  "name": "hacha-extension",
+  "version": "1.0.0",
+  "description": "HaCha AI Fact Checker Chrome Extension",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.263",
+    "typescript": "^5.4.5"
+  }
+}
