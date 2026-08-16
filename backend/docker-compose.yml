@@ -1,0 +1,42 @@
+# HaCha AI Backend - Docker Compose for Local Development
+# Provides Redis for Phase 6 caching layer
+
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: hacha-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Uncomment for Phase 7+ when MongoDB is needed
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: hacha-mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   environment:
+  #     MONGO_INITDB_DATABASE: hacha
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+volumes:
+  redis_data:
+  # mongodb_data:

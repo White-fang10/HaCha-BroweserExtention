@@ -1,65 +1,138 @@
 /**
- * Verification Service - Stub Implementation
+ * Verification Service - Phase 6 with Redis Cache
  *
- * This is a placeholder for the full 3-tier verification cascade:
+ * Implements the cache-aside pattern:
  * 1. Redis Cache → 2. Google Fact Check API → 3. Python AI Service (RAG+LLM)
- *
- * Currently returns UNVERIFIED for all claims.
- * TODO: Implement the full verification cascade in Phase 5+.
  */
 import { VerificationData, Verdict, SourceTier, VerificationSource } from "../types/api.js";
 import { logger } from "../utils/logger.js";
-import { createClaimId } from "../utils/claim-id.js";
+import { normalizeClaim } from "./claim/claim-normalizer.js";
+import { createClaimIdentity } from "./claim/claim-hasher.js";
+import { initCacheService, getCachedVerification, setCachedVerification, getCacheConfig } from "./cache/redis-cache.service.js";
+import { checkRedisHealth } from "./cache/redis.client.js";
+import { connectRedis } from "./cache/redis.client.js";
+import { env } from "../config/env.js";
+
+/** Initialize cache service on module load */
+const cacheConfig = {
+  redisUrl: env.redisUrl,
+  defaultTtlSeconds: env.cacheTtlSeconds,
+  keyPrefix: env.cacheKeyPrefix,
+  schemaVersion: env.cacheSchemaVersion as "v1",
+  enabled: env.cacheEnabled,
+  connectTimeoutMs: env.cacheConnectTimeoutMs,
+  commandTimeoutMs: env.cacheCommandTimeoutMs,
+  maxRetries: env.cacheMaxRetries,
+};
+initCacheService(cacheConfig);
+
+/** Connect to Redis (non-blocking) */
+let redisConnected = false;
+connectRedis(cacheConfig)
+  .then(() => {
+    redisConnected = true;
+    logger.info("Redis connected for verification service");
+  })
+  .catch((error) => {
+    logger.warn("Redis connection failed, cache disabled", { error: error.message });
+    redisConnected = false;
+  });
 
 /**
- * Generate SHA-256 hash of a claim for cache keys.
- */
-async function hashClaim(claim: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(claim.toLowerCase().trim());
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-/**
- * Normalize claim for consistent processing.
- */
-function normalizeClaim(claim: string): string {
-  return claim.trim().replace(/\s+/g, " ");
-}
-
-/**
- * Main verification function - stub implementation.
- * Returns UNVERIFIED for all claims until full cascade is implemented.
+ * Main verification function with Redis cache integration.
+ * Implements cache-aside pattern.
  */
 export async function verifyClaim(claim: string, requestId: string): Promise<VerificationData> {
   const startTime = Date.now();
+
+  // Phase 5: Normalize and create claim identity
   const normalized = normalizeClaim(claim);
-  const claimId = await createClaimId(normalized);
-  const claimHash = await hashClaim(normalized);
+  const identity = await createClaimIdentity(normalized);
+  const claimHash = identity.hash;
 
   // Log without sensitive content
   logger.debug("Verifying claim", {
     requestId,
     claimHash,
-    claimLength: normalized.length,
+    normalizedLength: normalized.normalizedText.length,
+    warnings: normalized.warnings,
   });
 
-  // TODO: Implement 3-tier cascade:
-  // 1. Check Redis cache (Phase 5)
-  // 2. Call Google Fact Check API (Phase 5)
-  // 3. Call Python AI RAG service (Phase 6)
+  // Phase 6: Check Redis cache first (Tier 1)
+  const cacheResult = await getCachedVerification(claimHash);
 
-  // For now, return UNVERIFIED
-  const result: VerificationData = {
-    claimId,
-    normalizedClaim: normalized,
+  if (cacheResult.hit && cacheResult.verification) {
+    const cached = cacheResult.verification;
+    const durationMs = Date.now() - startTime;
+
+    const result: VerificationData = {
+      claimId: claimHash,
+      normalizedClaim: cached.normalizedClaim,
+      claimHash,
+      normalizationVersion: identity.normalizationVersion,
+      verdict: cached.verdict,
+      confidence: cached.confidence,
+      explanation: cached.explanation,
+      sources: cached.sources,
+      sourceTier: cached.sourceTier,
+      cached: true,
+      timestamp: new Date().toISOString(),
+    };
+
+    logger.logVerification(
+      requestId,
+      result.verdict,
+      result.confidence,
+      result.sourceTier,
+      true, // cached
+      durationMs
+    );
+
+    logger.debug("Cache hit - returning cached result", {
+      requestId,
+      claimHash,
+      verdict: result.verdict,
+      durationMs,
+    });
+
+    return result;
+  }
+
+  // Cache miss - proceed to stub verification (will be replaced by real tiers in Phase 7+)
+  logger.debug("Cache miss - proceeding to verification", { requestId, claimHash });
+
+  // TODO Phase 7: Call Google Fact Check API
+  // TODO Phase 8+: Call Python AI RAG service
+
+  // For now, return UNVERIFIED (stub)
+  const verificationResult = {
     verdict: "UNVERIFIED" as Verdict,
     confidence: 0,
     explanation: "Verification service not yet implemented. This is a stub response.",
-    sources: [],
+    sources: [] as VerificationSource[],
     sourceTier: "AI_RAG" as SourceTier, // Will be determined by actual tier that responds
+  };
+
+  // Cache the result for future requests
+  await setCachedVerification(claimHash, {
+    normalizedClaim: normalized.normalizedText,
+    verdict: verificationResult.verdict,
+    confidence: verificationResult.confidence,
+    explanation: verificationResult.explanation,
+    sources: verificationResult.sources,
+    sourceTier: verificationResult.sourceTier,
+  });
+
+  const result: VerificationData = {
+    claimId: claimHash,
+    normalizedClaim: normalized.normalizedText,
+    claimHash,
+    normalizationVersion: identity.normalizationVersion,
+    verdict: verificationResult.verdict,
+    confidence: verificationResult.confidence,
+    explanation: verificationResult.explanation,
+    sources: verificationResult.sources,
+    sourceTier: verificationResult.sourceTier,
     cached: false,
     timestamp: new Date().toISOString(),
   };
@@ -86,9 +159,19 @@ export async function checkVerificationHealth(): Promise<{
   factCheckApi: "healthy" | "unhealthy" | "not_configured";
   aiService: "healthy" | "unhealthy" | "not_configured";
 }> {
+  const redisHealth = await checkRedisHealth();
+
   return {
-    redis: "not_configured",
+    redis: redisHealth,
     factCheckApi: "not_configured",
     aiService: "not_configured",
   };
+}
+
+/**
+ * Check if Redis is available for caching.
+ * @returns True if Redis is connected and cache is enabled
+ */
+export function isCacheAvailable(): boolean {
+  return redisConnected && cacheConfig.enabled;
 }

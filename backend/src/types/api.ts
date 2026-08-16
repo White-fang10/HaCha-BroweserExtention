@@ -39,6 +39,10 @@ export interface VerificationSource {
 export interface VerificationData {
   claimId: string;
   normalizedClaim: string;
+  /** Claim hash (SHA-256) for Phase 6 cache identity */
+  claimHash: string;
+  /** Normalization version */
+  normalizationVersion: string;
   verdict: Verdict;
   confidence: number;
   explanation: string;

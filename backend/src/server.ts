@@ -5,6 +5,7 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
+import { closeRedis } from "./services/cache/redis.client.js";
 
 /**
  * Start the HTTP server.
@@ -18,12 +19,18 @@ async function startServer(): Promise<void> {
       port,
       environment: env.nodeEnv,
       corsOrigin: env.corsOrigin,
+      redisUrl: env.redisUrl,
+      cacheEnabled: env.cacheEnabled,
     });
   });
 
   // Graceful shutdown
-  const shutdown = (signal: string) => {
+  const shutdown = async (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
+
+    // Close Redis connection
+    await closeRedis();
+
     server.close(() => {
       logger.info("Server closed");
       process.exit(0);
