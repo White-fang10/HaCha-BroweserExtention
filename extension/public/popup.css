@@ -75,6 +75,49 @@ button:disabled {
     display: none;
 }
 
+.status-area {
+    width: 100%;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.status-value {
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.status-value.checking {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.status-value.connected {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-value.disconnected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
 .footer {
     margin-top: 10px;
     font-size: 12px;

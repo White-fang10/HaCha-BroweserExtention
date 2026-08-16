@@ -3,15 +3,18 @@ import { HaChaMessage } from "../shared/messages.js";
 
 console.log("[HaCha][Popup] Initialized");
 
+const BACKEND_URL = "http://localhost:3000/api/health";
+
 document.addEventListener("DOMContentLoaded", () => {
     const activateBtn = document.getElementById("activate-btn") as HTMLButtonElement;
     const errorDiv = document.getElementById("error-message") as HTMLDivElement;
+    const backendStatus = document.getElementById("backend-status") as HTMLSpanElement;
 
     let currentState: HaChaState = "IDLE";
 
     function updateState(newState: HaChaState, errorMessage?: string) {
         currentState = newState;
-        
+
         switch (newState) {
             case "IDLE":
                 activateBtn.textContent = "Activate HaCha";
@@ -36,6 +39,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
         }
     }
+
+    function updateBackendStatus(status: "connected" | "disconnected" | "checking", message?: string) {
+        backendStatus.textContent = message || (status === "connected" ? "Connected" : status === "disconnected" ? "Disconnected" : "Checking...");
+        backendStatus.className = "status-value " + status;
+    }
+
+    async function checkBackend() {
+        updateBackendStatus("checking");
+        try {
+            const response = await fetch(BACKEND_URL, { method: "GET" });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.status === "healthy") {
+                    updateBackendStatus("connected");
+                } else {
+                    updateBackendStatus("disconnected", "Unhealthy");
+                }
+            } else {
+                updateBackendStatus("disconnected", `Error ${response.status}`);
+            }
+        } catch (err) {
+            updateBackendStatus("disconnected", "Offline");
+        }
+    }
+
+    // Check backend on popup open
+    checkBackend();
 
     activateBtn.addEventListener("click", () => {
         updateState("ACTIVATING");

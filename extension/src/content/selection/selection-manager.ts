@@ -4,6 +4,8 @@ import { captureSelection } from "./selection-capture.js";
 import { preprocessForOCR } from "../ocr/image-preprocessor.js";
 import { ocrManager } from "../ocr/ocr-manager.js";
 import { OCRConfirmationPanel } from "../ui/ocr-confirmation.js";
+import { verifyClaim } from "../verification/verification-service.js";
+import { VerificationResultPanel, VerificationLoadingPanel } from "../ui/verification-result.js";
 
 export class SelectionManager {
     private state: SelectionState;
@@ -121,10 +123,35 @@ export class SelectionManager {
             const ocrResult = await ocrManager.recognize(processedCanvas);
 
             // 4. Show confirmation panel for the user to review/edit
-            const panel = new OCRConfirmationPanel(ocrResult, (action, confirmedText) => {
+            const panel = new OCRConfirmationPanel(ocrResult, async (action, confirmedText) => {
                 if (action === "verify") {
                     console.log("[HaCha] Claim confirmed for verification:", confirmedText);
-                    // Phase 4 will send confirmedText to the backend here
+                    // Show loading panel
+                    const loadingPanel = new VerificationLoadingPanel(confirmedText);
+                    loadingPanel.attach();
+
+                    // Call backend verification
+                    const result = await verifyClaim(confirmedText);
+                    loadingPanel.detach();
+
+                    if (result.success && result.data) {
+                        // Show verification result
+                        const resultPanel = new VerificationResultPanel(result.data, (resultAction) => {
+                            if (resultAction === "verify-again") {
+                                // Restart selection flow
+                                this.state.setState("INACTIVE");
+                                this.start();
+                            }
+                        });
+                        resultPanel.attach();
+                    } else {
+                        // Show error
+                        const errorPanel = new VerificationLoadingPanel(confirmedText);
+                        errorPanel.attach();
+                        errorPanel.showError(result.error || "Verification failed");
+                        // Auto-dismiss after 5 seconds
+                        setTimeout(() => errorPanel.detach(), 5000);
+                    }
                 } else if (action === "select-again") {
                     // Restart the selection flow
                     this.state.setState("INACTIVE");
