@@ -116,8 +116,9 @@ function unicodeNormalize(text: string): string {
 
 /**
  * Step 2/3: Trim and collapse whitespace.
+ * Exported for use in matching module.
  */
-function normalizeWhitespace(text: string): string {
+export function normalizeWhitespace(text: string): string {
   // Replace control characters with space
   let result = text.replace(CONTROL_CHAR_REGEX, " ");
   // Replace all unicode whitespace with single space
