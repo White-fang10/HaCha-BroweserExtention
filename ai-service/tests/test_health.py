@@ -38,12 +38,17 @@ class TestReadinessEndpoint:
     """Tests for /ready endpoint."""
 
     async def test_ready_returns_ready(self, client):
-        """Readiness endpoint should return ready status."""
+        """Readiness endpoint should return ready or degraded status.
+
+        With Phase 10, readiness depends on LLM provider health.
+        If local Ollama is not running, status will be 'degraded'.
+        """
         response = await client.get("/ready")
 
         assert response.status_code == 200
         data = response.json()
-        assert data["status"] == "ready"
+        # Accept both ready and degraded (when LLM is not available)
+        assert data["status"] in ("ready", "degraded")
         assert data["service"] == "hacha-ai-service"
         assert "version" in data
 
