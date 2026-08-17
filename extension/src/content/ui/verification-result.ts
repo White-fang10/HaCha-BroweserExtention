@@ -1,5 +1,6 @@
 /**
  * Shadow DOM based verification result panel that shows fact-check results.
+ * Positioned contextually near the user's selection.
  */
 import {
     type VerificationData,
@@ -9,19 +10,27 @@ import {
     getVerdictClass,
     formatTimestamp,
 } from "../verification/verification-service.js";
+import { calculatePosition, getViewport, type Rect, debounce, throttle } from "./positioning.js";
 
 type ResultCallback = "dismiss" | "verify-again";
 
 /**
  * Panel that displays verification results to the user.
+ * Positioned contextually near the selection rectangle.
  */
 export class VerificationResultPanel {
     private host: HTMLDivElement;
     private shadowRoot: ShadowRoot;
     private onAction: (action: ResultCallback) => void;
 
-    constructor(result: VerificationData, onAction: (action: ResultCallback) => void) {
+    private selectionRect: Rect;
+    private position: { x: number; y: number; position: string } = { x: 0, y: 0, position: "right" };
+    private scrollHandler: (() => void) | null = null;
+    private resizeHandler: (() => void) | null = null;
+
+    constructor(result: VerificationData, selectionRect: Rect, onAction: (action: ResultCallback) => void) {
         this.onAction = onAction;
+        this.selectionRect = selectionRect;
 
         this.host = document.createElement("div");
         this.host.id = "hacha-verification-result-host";
@@ -39,46 +48,69 @@ export class VerificationResultPanel {
         style.textContent = `
             * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-            .backdrop {
+            .card-container {
                 position: absolute;
-                inset: 0;
-                background: rgba(0,0,0,0.55);
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                max-width: 90vw;
+                max-height: 85vh;
                 pointer-events: all;
+            }
+
+            .backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.3);
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                pointer-events: all;
+                z-index: -1;
             }
 
             .panel {
                 background: #1f2937;
                 color: #f9fafb;
                 border-radius: 12px;
-                padding: 24px;
-                width: 520px;
-                max-width: 90vw;
+                padding: 20px;
+                width: 380px;
                 max-height: 85vh;
                 overflow-y: auto;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.4);
                 animation: slideIn 0.2s ease;
+                border: 1px solid #374151;
             }
 
             @keyframes slideIn {
-                from { opacity: 0; transform: translateY(-12px); }
+                from { opacity: 0; transform: translateY(-8px); }
                 to   { opacity: 1; transform: translateY(0); }
             }
 
             .header {
-                font-size: 16px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 8px;
+            }
+
+            .header-title {
+                font-size: 15px;
                 font-weight: 600;
-                margin-bottom: 4px;
                 color: #c7d2fe;
             }
 
-            .subheader {
-                font-size: 12px;
-                color: #9ca3af;
-                margin-bottom: 14px;
+            .close-btn {
+                background: #374151;
+                color: #e5e7eb;
+                border: none;
+                border-radius: 6px;
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
+            .close-btn:hover { background: #4b5563; }
 
             .verdict-badge {
                 display: inline-flex;
@@ -88,7 +120,7 @@ export class VerificationResultPanel {
                 border-radius: 8px;
                 font-size: 14px;
                 font-weight: 600;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
             }
 
             .verdict-supported { background: #064e3b; color: #6ee7b7; }
@@ -102,10 +134,11 @@ export class VerificationResultPanel {
                 background: #111827;
                 border-radius: 6px;
                 padding: 10px 12px;
-                font-size: 14px;
+                font-size: 13px;
                 color: #e5e7eb;
-                margin-bottom: 12px;
+                margin-bottom: 10px;
                 line-height: 1.5;
+                border-left: 3px solid #6366f1;
             }
 
             .section-title {
@@ -120,14 +153,17 @@ export class VerificationResultPanel {
                 font-size: 13px;
                 color: #d1d5db;
                 line-height: 1.6;
+                max-height: 200px;
+                overflow-y: auto;
             }
 
             .meta-row {
                 display: flex;
-                gap: 12px;
+                gap: 10px;
                 margin-top: 8px;
                 font-size: 12px;
                 color: #6b7280;
+                flex-wrap: wrap;
             }
 
             .meta-row .badge {
@@ -160,46 +196,69 @@ export class VerificationResultPanel {
                 font-style: italic;
             }
 
+            .expand-btn {
+                background: transparent;
+                color: #818cf8;
+                border: none;
+                font-size: 12px;
+                cursor: pointer;
+                padding: 4px 0;
+                text-decoration: underline;
+            }
+
             .actions {
                 display: flex;
                 gap: 10px;
-                margin-top: 18px;
+                margin-top: 16px;
             }
 
-            button {
-                padding: 10px 18px;
+            button.btn-primary, button.btn-secondary {
+                padding: 8px 16px;
                 border-radius: 6px;
                 border: none;
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: background-color 0.15s ease;
-            }
-
-            .btn-close {
-                background: #374151;
-                color: #e5e7eb;
                 flex: 1;
             }
-            .btn-close:hover { background: #4b5563; }
 
-            .btn-retry {
-                background: #4338ca;
+            .btn-primary {
+                background: #4f46e5;
                 color: white;
             }
-            .btn-retry:hover { background: #3730a3; }
+            .btn-primary:hover { background: #4338ca; }
+
+            .btn-secondary {
+                background: #374151;
+                color: #e5e7eb;
+            }
+            .btn-secondary:hover { background: #4b5563; }
+
+            /* Accessibility focus styles */
+            button:focus-visible {
+                outline: 2px solid #a5b4fc;
+                outline-offset: 2px;
+            }
         `;
         this.shadowRoot.appendChild(style);
 
-        const backdrop = document.createElement("div");
-        backdrop.className = "backdrop";
+        const cardContainer = document.createElement("div");
+        cardContainer.className = "card-container";
 
         const panel = document.createElement("div");
         panel.className = "panel";
 
+        const isExpanded = result.explanation.length > 200;
+        const displayExplanation = isExpanded
+            ? result.explanation.substring(0, 200) + "..."
+            : result.explanation;
+
         panel.innerHTML = `
-            <div class="header">HaCha Fact Check Result</div>
-            <div class="subheader">${formatTimestamp(result.timestamp)}</div>
+            <div class="header">
+                <div class="header-title">HaCha Fact Check</div>
+                <button id="btn-close" class="close-btn" aria-label="Close result">&times;</button>
+            </div>
 
             <div class="verdict-badge ${getVerdictClass(result.verdict)}">
                 <span class="verdict-icon">${this.getVerdictIcon(result.verdict)}</span>
@@ -209,7 +268,8 @@ export class VerificationResultPanel {
             <div class="claim-box">${this.escapeHtml(result.normalizedClaim)}</div>
 
             <div class="section-title">Analysis</div>
-            <div class="explanation">${this.escapeHtml(result.explanation)}</div>
+            <div class="explanation" id="explanation-text">${this.escapeHtml(displayExplanation)}</div>
+            ${isExpanded ? '<button id="btn-expand" class="expand-btn">Read full analysis</button>' : ''}
 
             <div class="meta-row">
                 <span class="badge">Confidence: ${(result.confidence * 100).toFixed(0)}%</span>
@@ -219,7 +279,7 @@ export class VerificationResultPanel {
 
             <div class="section-title">Sources</div>
             ${result.sources.length > 0
-                ? result.sources.map(s => `
+                ? result.sources.slice(0, 3).map(s => `
                     <div class="source">
                         <a href="${this.escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(s.title)}</a>
                         <div class="publisher">${this.escapeHtml(s.publisher)} &middot; ${this.escapeHtml(s.publishDate)}</div>
@@ -227,30 +287,82 @@ export class VerificationResultPanel {
                 `).join("")
                 : '<div class="no-sources">No sources available for this claim.</div>'
             }
+            ${result.sources.length > 3 ? `<div class="meta-row"><span class="badge">+${result.sources.length - 3} more sources</span></div>` : ''}
 
             <div class="actions">
-                <button id="btn-retry" class="btn-retry">Verify Again</button>
-                <button id="btn-close" class="btn-close">Close</button>
+                <button id="btn-retry" class="btn-secondary">Verify Again</button>
             </div>
         `;
 
-        backdrop.appendChild(panel);
-        this.shadowRoot.appendChild(backdrop);
+        cardContainer.appendChild(panel);
+        this.shadowRoot.appendChild(cardContainer);
 
+        // Calculate position
+        this.updatePosition();
+
+        // Wire up event handlers
         setTimeout(() => {
-            const retryBtn = this.shadowRoot.getElementById("btn-retry");
             const closeBtn = this.shadowRoot.getElementById("btn-close");
+            const retryBtn = this.shadowRoot.getElementById("btn-retry");
+            const expandBtn = this.shadowRoot.getElementById("btn-expand");
+
+            closeBtn?.addEventListener("click", () => {
+                this.onAction("dismiss");
+                this.detach();
+            });
 
             retryBtn?.addEventListener("click", () => {
                 this.onAction("verify-again");
                 this.detach();
             });
 
-            closeBtn?.addEventListener("click", () => {
-                this.onAction("dismiss");
-                this.detach();
+            expandBtn?.addEventListener("click", () => {
+                const textEl = this.shadowRoot.getElementById("explanation-text");
+                if (textEl) {
+                    textEl.textContent = result.explanation;
+                    expandBtn.style.display = "none";
+                }
             });
         }, 0);
+
+        // Add scroll/resize handlers
+        this.scrollHandler = throttle(() => this.handleScrollOrResize(), 100);
+        this.resizeHandler = debounce(() => this.handleScrollOrResize(), 150);
+        window.addEventListener("scroll", this.scrollHandler, { passive: true, capture: true });
+        window.addEventListener("resize", this.resizeHandler);
+    }
+
+    /**
+     * Update card position based on current viewport and selection rect.
+     */
+    private updatePosition(): void {
+        const viewport = getViewport();
+        const cardContainer = this.shadowRoot.querySelector(".card-container") as HTMLDivElement | null;
+        if (!cardContainer) return;
+
+        const cardRect = cardContainer.getBoundingClientRect();
+        const cardWidth = cardRect.width || 380;
+        const cardHeight = cardRect.height || 200;
+
+        const pos = calculatePosition({
+            cardWidth,
+            cardHeight,
+            selectionRect: this.selectionRect,
+            viewport,
+        });
+
+        this.position = pos;
+
+        cardContainer.style.left = `${pos.x}px`;
+        cardContainer.style.top = `${pos.y}px`;
+    }
+
+    /**
+     * Handle scroll/resize events to reposition card.
+     */
+    private handleScrollOrResize(): void {
+        // Small movement: reposition
+        this.updatePosition();
     }
 
     private getVerdictIcon(verdict: string): string {
@@ -275,18 +387,40 @@ export class VerificationResultPanel {
     }
 
     public detach() {
-        this.host.parentNode?.removeChild(this.host);
+        if (this.host.parentNode) {
+            this.host.parentNode.removeChild(this.host);
+        }
+        // Clean up handlers
+        if (this.scrollHandler) {
+            window.removeEventListener("scroll", this.scrollHandler, { capture: true } as EventListenerOptions);
+            this.scrollHandler = null;
+        }
+        if (this.resizeHandler) {
+            window.removeEventListener("resize", this.resizeHandler);
+            this.resizeHandler = null;
+        }
     }
 }
 
 /**
  * Loading/error panel for verification states.
+ * Positioned contextually near the selection.
  */
 export class VerificationLoadingPanel {
     private host: HTMLDivElement;
     private shadowRoot: ShadowRoot;
+    private claimText: string;
+    private selectionRect: Rect;
 
-    constructor(claimText: string) {
+    constructor(claimText: string, selectionRect?: Rect) {
+        this.claimText = claimText;
+        this.selectionRect = selectionRect || {
+            x: window.innerWidth / 2 - 100,
+            y: window.innerHeight / 2 - 50,
+            width: 200,
+            height: 100,
+        };
+
         this.host = document.createElement("div");
         this.host.id = "hacha-verification-loading-host";
         this.host.style.position = "fixed";
@@ -302,54 +436,54 @@ export class VerificationLoadingPanel {
         const style = document.createElement("style");
         style.textContent = `
             * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-            .backdrop {
+
+            .card-container {
                 position: absolute;
-                inset: 0;
-                background: rgba(0,0,0,0.55);
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                max-width: 90vw;
                 pointer-events: all;
             }
+
             .panel {
                 background: #1f2937;
                 color: #f9fafb;
                 border-radius: 12px;
-                padding: 24px;
-                width: 420px;
-                max-width: 90vw;
-                text-align: center;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+                padding: 20px;
+                width: 320px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+                border: 1px solid #374151;
             }
+
             .spinner {
-                width: 40px;
-                height: 40px;
+                width: 36px;
+                height: 36px;
                 border: 4px solid #374151;
                 border-top-color: #6366f1;
                 border-radius: 50%;
                 animation: spin 0.8s linear infinite;
-                margin: 0 auto 16px;
+                margin: 0 auto 14px;
             }
             @keyframes spin { to { transform: rotate(360deg); } }
-            .header { font-size: 15px; font-weight: 600; color: #c7d2fe; margin-bottom: 8px; }
+
+            .header { font-size: 14px; font-weight: 600; color: #c7d2fe; margin-bottom: 6px; text-align: center; }
+            .progress-stage { font-size: 12px; color: #9ca3af; text-align: center; margin-bottom: 10px; }
             .claim-box {
                 background: #111827;
                 border-radius: 6px;
-                padding: 10px 12px;
-                font-size: 13px;
+                padding: 8px 10px;
+                font-size: 12px;
                 color: #e5e7eb;
-                margin-top: 12px;
-                max-height: 120px;
+                max-height: 80px;
                 overflow-y: auto;
                 text-align: left;
                 line-height: 1.5;
             }
-            .error { color: #fca5a5; font-size: 13px; margin-top: 12px; }
+
+            .error { color: #fca5a5; font-size: 13px; margin-top: 10px; }
         `;
         this.shadowRoot.appendChild(style);
 
-        const backdrop = document.createElement("div");
-        backdrop.className = "backdrop";
+        const cardContainer = document.createElement("div");
+        cardContainer.className = "card-container";
 
         const panel = document.createElement("div");
         panel.className = "panel";
@@ -357,11 +491,41 @@ export class VerificationLoadingPanel {
         panel.innerHTML = `
             <div class="spinner"></div>
             <div class="header">Verifying claim...</div>
-            <div class="claim-box">${this.escapeHtml(claimText)}</div>
+            <div class="progress-stage" id="progress-stage">Checking existing fact-checks</div>
+            <div class="claim-box">${this.escapeHtml(this.claimText)}</div>
         `;
 
-        backdrop.appendChild(panel);
-        this.shadowRoot.appendChild(backdrop);
+        cardContainer.appendChild(panel);
+        this.shadowRoot.appendChild(cardContainer);
+
+        this.updatePosition();
+    }
+
+    private updatePosition(): void {
+        const viewport = getViewport();
+        const cardContainer = this.shadowRoot.querySelector(".card-container") as HTMLDivElement | null;
+        if (!cardContainer) return;
+
+        const cardRect = cardContainer.getBoundingClientRect();
+        const cardWidth = cardRect.width || 320;
+        const cardHeight = cardRect.height || 150;
+
+        const pos = calculatePosition({
+            cardWidth,
+            cardHeight,
+            selectionRect: this.selectionRect,
+            viewport,
+        });
+
+        cardContainer.style.left = `${pos.x}px`;
+        cardContainer.style.top = `${pos.y}px`;
+    }
+
+    public setProgressStage(stage: string) {
+        const stageEl = this.shadowRoot.getElementById("progress-stage");
+        if (stageEl) {
+            stageEl.textContent = stage;
+        }
     }
 
     public showError(message: string) {
@@ -388,6 +552,8 @@ export class VerificationLoadingPanel {
     }
 
     public detach() {
-        this.host.parentNode?.removeChild(this.host);
+        if (this.host.parentNode) {
+            this.host.parentNode.removeChild(this.host);
+        }
     }
 }
