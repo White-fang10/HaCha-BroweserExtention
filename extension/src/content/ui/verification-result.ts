@@ -11,6 +11,7 @@ import {
     formatTimestamp,
 } from "../verification/verification-service.js";
 import { calculatePosition, getViewport, type Rect, debounce, throttle } from "./positioning.js";
+import { escapeHtml, sanitizeUrl } from "./xss-protection.js";
 
 type ResultCallback = "dismiss" | "verify-again";
 
@@ -265,10 +266,10 @@ export class VerificationResultPanel {
                 <span>${getVerdictLabel(result.verdict)}</span>
             </div>
 
-            <div class="claim-box">${this.escapeHtml(result.normalizedClaim)}</div>
+            <div class="claim-box">${escapeHtml(result.normalizedClaim)}</div>
 
             <div class="section-title">Analysis</div>
-            <div class="explanation" id="explanation-text">${this.escapeHtml(displayExplanation)}</div>
+            <div class="explanation" id="explanation-text">${escapeHtml(displayExplanation)}</div>
             ${isExpanded ? '<button id="btn-expand" class="expand-btn">Read full analysis</button>' : ''}
 
             <div class="meta-row">
@@ -281,8 +282,8 @@ export class VerificationResultPanel {
             ${result.sources.length > 0
                 ? result.sources.slice(0, 3).map(s => `
                     <div class="source">
-                        <a href="${this.escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(s.title)}</a>
-                        <div class="publisher">${this.escapeHtml(s.publisher)} &middot; ${this.escapeHtml(s.publishDate)}</div>
+                        <a href="${sanitizeUrl(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.title)}</a>
+                        <div class="publisher">${escapeHtml(s.publisher)} &middot; ${escapeHtml(s.publishDate)}</div>
                     </div>
                 `).join("")
                 : '<div class="no-sources">No sources available for this claim.</div>'
@@ -372,14 +373,6 @@ export class VerificationResultPanel {
             case "MISLEADING": return "⚠";
             default: return "?";
         }
-    }
-
-    private escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
     }
 
     public attach() {
@@ -492,7 +485,7 @@ export class VerificationLoadingPanel {
             <div class="spinner"></div>
             <div class="header">Verifying claim...</div>
             <div class="progress-stage" id="progress-stage">Checking existing fact-checks</div>
-            <div class="claim-box">${this.escapeHtml(this.claimText)}</div>
+            <div class="claim-box">${escapeHtml(this.claimText)}</div>
         `;
 
         cardContainer.appendChild(panel);
@@ -533,18 +526,10 @@ export class VerificationLoadingPanel {
         if (panel) {
             panel.innerHTML = `
                 <div class="header" style="color:#fca5a5">Verification Failed</div>
-                <div class="error">${this.escapeHtml(message)}</div>
-                <div class="claim-box">${this.escapeHtml("Please try again or verify manually.")}</div>
+                <div class="error">${escapeHtml(message)}</div>
+                <div class="claim-box">${escapeHtml("Please try again or verify manually.")}</div>
             `;
         }
-    }
-
-    private escapeHtml(text: string): string {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
     }
 
     public attach() {

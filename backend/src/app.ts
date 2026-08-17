@@ -8,6 +8,10 @@ import { env } from "./config/env.js";
 import { requestIdMiddleware } from "./middleware/request-id.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { notFoundHandler } from "./middleware/not-found.js";
+import { rateLimiters, compositeRateLimiter } from "./middleware/rate-limiter.js";
+import { securityHeaders } from "./middleware/security-headers.js";
+import { inputValidation } from "./middleware/input-validation.js";
+import { extensionAuthMiddleware } from "./middleware/auth.js";
 import { logger } from "./utils/logger.js";
 import { verifyRoutes } from "./routes/verify.routes.js";
 import { healthRoutes } from "./routes/health.routes.js";
@@ -49,13 +53,31 @@ export function createApp(): express.Application {
   };
   app.use(cors(corsOptions));
 
-  // 4. JSON body parser with size limit
+  // 4. Security headers middleware (after CORS to allow CSP to work properly)
+  const isProduction = env.nodeEnv === "production";
+  app.use(isProduction ? securityHeaders.production : securityHeaders.development);
+
+  // 5. JSON body parser with size limit
   app.use(express.json({ limit: "1mb" }));
 
   // 5. URL encoded parser (for form data if needed)
   app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
-  // 6. API routes
+  // 6. Input validation middleware
+  app.use("/api/verify", inputValidation.verify);
+  app.use("/api/health", inputValidation.health);
+
+  // 7. Rate limiting middleware (applied before routes)
+  // Health endpoint gets more lenient rate limiting
+  app.use("/api/health", rateLimiters.health);
+
+  // Verify endpoint gets strict rate limiting
+  app.use("/api/verify", rateLimiters.verify);
+
+  // 8. Authentication middleware for verify endpoint
+  app.use("/api/verify", extensionAuthMiddleware);
+
+  // 9. API routes
   app.use("/api/verify", verifyRoutes);
   app.use("/api/health", healthRoutes);
 

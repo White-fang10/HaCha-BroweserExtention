@@ -12,11 +12,18 @@ import {
     type CaptureResponse,
     type VerifyResponse,
 } from "../shared/messages.js";
+import { generateRequestId } from "../shared/utils.js";
 
 console.log("[HaCha][Background] Service Worker started");
 
 // Track active verification requests per tab
 const activeRequests = new Map<number, string>(); // tabId -> requestId
+
+// Extension configuration
+const EXTENSION_CONFIG = {
+    EXTENSION_ID: "hacha-extension",
+    VERSION: "1.0.0",
+} as const;
 
 // Backend configuration
 const BACKEND_CONFIG = {
@@ -25,6 +32,49 @@ const BACKEND_CONFIG = {
     HEALTH_ENDPOINT: "/api/health",
     TIMEOUT_MS: 30000,
 } as const;
+
+/**
+ * Generate extension authentication token for backend requests.
+ * Format: hacha_v1_<base64(payload)>_<signature>
+ * Uses Web Crypto API to generate HMAC-SHA256 signature.
+ */
+async function generateExtensionAuthToken(): Promise<string> {
+    const payload = {
+        extensionId: EXTENSION_CONFIG.EXTENSION_ID,
+        version: EXTENSION_CONFIG.VERSION,
+        issuedAt: Date.now(),
+    };
+
+    const payloadB64 = btoa(JSON.stringify(payload));
+
+    // Get the shared secret from storage or use development default
+    // In production, this should be configured securely
+    const secret = "development-extension-secret-change-in-production";
+
+    // Generate HMAC-SHA256 signature using Web Crypto API
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const messageData = encoder.encode(payloadB64);
+
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+    );
+
+    const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+    const signatureArray = new Uint8Array(signatureBuffer);
+    const fullSignature = Array.from(signatureArray)
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+
+    // Take first 32 chars to match backend format
+    const signature = fullSignature.substring(0, 32);
+
+    return `hacha_v1_${payloadB64}_${signature}`;
+}
 
 chrome.runtime.onMessage.addListener((
     message: HaChaMessage,
@@ -145,10 +195,12 @@ async function handleVerifyClaim(
             // Notify content script of progress
             notifyProgress(tabId, requestId, "Checking existing fact-checks...");
 
+            const authToken = await generateExtensionAuthToken();
             const response = await fetch(`${BACKEND_CONFIG.BASE_URL}${BACKEND_CONFIG.VERIFY_ENDPOINT}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${authToken}`,
                 },
                 body: JSON.stringify({
                     claim,

@@ -1,4 +1,5 @@
 import { OCRResult } from "../../shared/types.js";
+import { escapeHtml, sanitizeUrl } from "./xss-protection.js";
 
 type PanelCallback = "verify" | "select-again" | "dismiss";
 

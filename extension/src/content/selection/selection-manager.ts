@@ -9,6 +9,7 @@ import { stateMachine, HaChaState } from "../ui/state.js";
 import { uiRoot } from "../ui/root.js";
 import { generateRequestId } from "../../shared/utils.js";
 import { SelectionRect } from "../../shared/types.js";
+import { sanitizeText } from "../ui/xss-protection.js";
 
 export class SelectionManager {
     private state: SelectionState;
@@ -229,7 +230,7 @@ export class SelectionManager {
     private showError(message: string): void {
         const errorHost = document.createElement("div");
         errorHost.style.cssText = "position:fixed;top:20px;right:20px;background:#7f1d1d;color:#fca5a5;padding:14px 18px;border-radius:8px;font-family:sans-serif;font-size:14px;z-index:2147483647;";
-        errorHost.textContent = message;
+        errorHost.textContent = sanitizeText(message);
         document.body.appendChild(errorHost);
         setTimeout(() => errorHost.parentNode?.removeChild(errorHost), 5000);
     }

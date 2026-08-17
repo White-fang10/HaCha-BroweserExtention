@@ -17,6 +17,9 @@ interface EnvConfig {
   mongodbUri: string;
   aiServiceUrl: string;
   aiServiceToken: string;
+  // Authentication secrets
+  extensionAuthSecret: string;
+  aiServiceAuthSecret: string;
   // Cache configuration
   cacheTtlSeconds: number;
   cacheKeyPrefix: string;
@@ -101,6 +104,9 @@ export const env: EnvConfig = {
   mongodbUri: getEnv("MONGODB_URI", "mongodb://localhost:27017/hacha"),
   aiServiceUrl: getEnv("AI_SERVICE_URL", "http://localhost:8000"),
   aiServiceToken: getEnv("AI_SERVICE_TOKEN", "development-secret"),
+  // Authentication secrets
+  extensionAuthSecret: getEnv("EXTENSION_AUTH_SECRET", "development-extension-secret-change-in-production"),
+  aiServiceAuthSecret: getEnv("AI_SERVICE_AUTH_SECRET", "development-ai-secret-change-in-production"),
   // Cache configuration
   cacheTtlSeconds: getEnvInt("CACHE_TTL_SECONDS", 86400),
   cacheKeyPrefix: getEnv("CACHE_KEY_PREFIX", "hacha:claim"),
@@ -169,6 +175,16 @@ export function validateEnv(): void {
     }
     if (env.aiServiceTimeoutMs <= 0) {
       throw new Error(`Invalid AI_SERVICE_TIMEOUT_MS: ${env.aiServiceTimeoutMs}`);
+    }
+  }
+
+  // Validate authentication secrets in production
+  if (env.nodeEnv === "production") {
+    if (env.extensionAuthSecret.includes("development") || env.extensionAuthSecret.length < 32) {
+      throw new Error("EXTENSION_AUTH_SECRET must be a strong secret (>=32 chars) in production");
+    }
+    if (env.aiServiceAuthSecret.includes("development") || env.aiServiceAuthSecret.length < 32) {
+      throw new Error("AI_SERVICE_AUTH_SECRET must be a strong secret (>=32 chars) in production");
     }
   }
 }
