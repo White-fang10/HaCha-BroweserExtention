@@ -1,0 +1,30 @@
+{
+  "name": "hacha-evaluation",
+  "version": "1.0.0",
+  "description": "HaCha AI Fact Checker Evaluation & Metrics Harness",
+  "type": "module",
+  "scripts": {
+    "evaluate": "tsx runner/evaluate.ts",
+    "stress": "tsx runner/stress-test.ts",
+    "ocr:generate": "tsx dataset/generate-ocr-images.ts",
+    "report": "tsx reports/generate-report.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.2",
+    "canvas": "^2.11.2",
+    "commander": "^12.1.0",
+    "csv-stringify": "^6.4.6",
+    "dotenv": "^16.4.5",
+    "fast-levenshtein": "^3.0.0",
+    "p-limit": "^6.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.10"
+  }
+}

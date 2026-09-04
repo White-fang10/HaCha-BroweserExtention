@@ -1,0 +1,1004 @@
+{
+  "metadata": {
+    "version": "v1",
+    "created": "2026-08-21",
+    "description": "HaCha AI Fact Checker benchmark dataset for Phase 13 evaluation.",
+    "label_notes": "Verdict labels (SUPPORTED/FALSE/MISLEADING/UNVERIFIED) are SYNTHETIC PLACEHOLDERS created to demonstrate the evaluation harness. They MUST be replaced with ground truth from primary sources (government docs, established fact-check orgs, peer-reviewed research) before being used to make accuracy claims about HaCha. See evaluation/README.md for labeling methodology.",
+    "classes": ["SUPPORTED", "FALSE", "MISLEADING", "UNVERIFIED"],
+    "domains": ["TECHNOLOGY", "SCIENCE", "HEALTH", "POLITICS", "FINANCE", "HISTORY", "ENVIRONMENT", "SPORTS", "CONSUMER", "CURRENT_EVENTS", "GENERAL"],
+    "difficulties": ["EASY", "MEDIUM", "HARD", "AMBIGUOUS", "TIME_SENSITIVE", "CONFLICTING_EVIDENCE"],
+    "size": 100
+  },
+  "claims": [
+    {
+      "id": "C001",
+      "claim": "The Earth orbits the Sun.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NASA: Earth's Orbit", "url": "https://science.nasa.gov/earth/facts/"}
+      ]
+    },
+    {
+      "id": "C002",
+      "claim": "Drinking bleach cures COVID-19.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "WHO COVID-19 Advice", "url": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/advice-for-public"}
+      ]
+    },
+    {
+      "id": "C003",
+      "claim": "5G networks spread the coronavirus.",
+      "label": "FALSE",
+      "domain": "TECHNOLOGY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "FCC: 5G Safety", "url": "https://www.fcc.gov/5g"}
+      ]
+    },
+    {
+      "id": "C004",
+      "claim": "The vaccine contains a microchip that tracks you.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "CDC Vaccine Myths", "url": "https://www.cdc.gov/vaccines/"}
+      ]
+    },
+    {
+      "id": "C005",
+      "claim": "Climate change is caused primarily by human activity.",
+      "label": "SUPPORTED",
+      "domain": "ENVIRONMENT",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "IPCC AR6 Summary", "url": "https://www.ipcc.ch/report/ar6/"}
+      ]
+    },
+    {
+      "id": "C006",
+      "claim": "The Moon landing was faked by the US government.",
+      "label": "FALSE",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NASA Apollo Archives", "url": "https://www.nasa.gov/mission/apollo/"}
+      ]
+    },
+    {
+      "id": "C007",
+      "claim": "Eating carrots significantly improves your eyesight beyond normal levels.",
+      "label": "MISLEADING",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "NIH: Vitamin A and Vision", "url": "https://www.ncbi.nlm.nih.gov/pmc/"}
+      ]
+    },
+    {
+      "id": "C008",
+      "claim": "The Great Wall of China is visible from space with the naked eye.",
+      "label": "FALSE",
+      "domain": "GENERAL",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "NASA Earth Observatory", "url": "https://earthobservatory.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C009",
+      "claim": "Water boils at 100 degrees Celsius at sea level.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Britannica: Boiling Point", "url": "https://www.britannica.com/science/boiling-point"}
+      ]
+    },
+    {
+      "id": "C010",
+      "claim": "Goldfish have a 3-second memory.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Scientific Studies on Fish Memory", "url": "https://pubmed.ncbi.nlm.nih.gov/"}
+      ]
+    },
+    {
+      "id": "C011",
+      "claim": "The stock market always goes up in the long term.",
+      "label": "MISLEADING",
+      "domain": "FINANCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "SEC Investor Education", "url": "https://www.sec.gov/investor"}
+      ]
+    },
+    {
+      "id": "C012",
+      "claim": "Bitcoin is backed by the US government.",
+      "label": "FALSE",
+      "domain": "FINANCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Federal Reserve: Crypto", "url": "https://www.federalreserve.gov/"}
+      ]
+    },
+    {
+      "id": "C013",
+      "claim": "The human body replaces all its cells every 7 years.",
+      "label": "MISLEADING",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Cell Turnover Research", "url": "https://www.nature.com/"}
+      ]
+    },
+    {
+      "id": "C014",
+      "claim": "Albert Einstein failed math in school.",
+      "label": "FALSE",
+      "domain": "HISTORY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Biographical Records", "url": "https://www.nobelprize.org/"}
+      ]
+    },
+    {
+      "id": "C015",
+      "claim": "The speed of light is approximately 299,792 kilometers per second.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NIST Constants", "url": "https://physics.nist.gov/"}
+      ]
+    },
+    {
+      "id": "C016",
+      "claim": "Cracking your knuckles causes arthritis.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Journal of Arthritis Research", "url": "https://arthritis-research.biomedcentral.com/"}
+      ]
+    },
+    {
+      "id": "C017",
+      "claim": "The COVID-19 vaccine was developed in less than a year.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "FDA Vaccine Timeline", "url": "https://www.fda.gov/vaccines-blood-biologics"}
+      ]
+    },
+    {
+      "id": "C018",
+      "claim": "Sharks are mammals.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Encyclopedia of Life", "url": "https://eol.org/"}
+      ]
+    },
+    {
+      "id": "C019",
+      "claim": "The Roman Empire fell in 476 CE.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Britannica: Fall of Rome", "url": "https://www.britannica.com/event/fall-of-rome"}
+      ]
+    },
+    {
+      "id": "C020",
+      "claim": "Nuclear power plants emit more radiation than coal plants.",
+      "label": "MISLEADING",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "UNSCEAR Reports", "url": "https://www.unscear.org/"}
+      ]
+    },
+    {
+      "id": "C021",
+      "claim": "The iPhone was the first smartphone.",
+      "label": "FALSE",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "History of Mobile Phones", "url": "https://www.theverge.com/"}
+      ]
+    },
+    {
+      "id": "C022",
+      "claim": "Lightning never strikes the same place twice.",
+      "label": "FALSE",
+      "domain": "GENERAL",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NOAA Lightning Safety", "url": "https://www.weather.gov/safety/lightning"}
+      ]
+    },
+    {
+      "id": "C023",
+      "claim": "The Eiffel Tower grows taller in summer due to thermal expansion.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Structural Engineering Studies", "url": "https://www.sciencedirect.com/"}
+      ]
+    },
+    {
+      "id": "C024",
+      "claim": "Bats are blind.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Bat Conservation International", "url": "https://batcon.org/"}
+      ]
+    },
+    {
+      "id": "C025",
+      "claim": "The Internet was invented by a single person.",
+      "label": "FALSE",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Internet Society History", "url": "https://www.internetsociety.org/"}
+      ]
+    },
+    {
+      "id": "C026",
+      "claim": "Vaccines cause autism.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "WHO: Vaccine Safety", "url": "https://www.who.int/teams/immunization-vaccines-and-biologicals"}
+      ]
+    },
+    {
+      "id": "C027",
+      "claim": "The Amazon rainforest produces 20% of the world's oxygen.",
+      "label": "MISLEADING",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "NASA Carbon Cycle", "url": "https://earthobservatory.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C028",
+      "claim": "The Titanic sank on its maiden voyage in 1912.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Historical Records", "url": "https://www.history.com/"}
+      ]
+    },
+    {
+      "id": "C029",
+      "claim": "Sugar makes children hyperactive.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "JAMA Pediatrics Studies", "url": "https://jamanetwork.com/journals/jamapediatrics"}
+      ]
+    },
+    {
+      "id": "C030",
+      "claim": "The pyramids of Giza were built by slaves.",
+      "label": "MISLEADING",
+      "domain": "HISTORY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Archaeological Evidence", "url": "https://www.nationalgeographic.com/"}
+      ]
+    },
+    {
+      "id": "C031",
+      "claim": "The human brain uses only 10% of its capacity.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Neuroscience Research", "url": "https://www.nature.com/neuro/"}
+      ]
+    },
+    {
+      "id": "C032",
+      "claim": "Coffee increases your risk of heart disease.",
+      "label": "MISLEADING",
+      "domain": "HEALTH",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "AHA Nutrition Studies", "url": "https://www.heart.org/"}
+      ]
+    },
+    {
+      "id": "C033",
+      "claim": "The Great Depression started with the 1929 stock market crash.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Federal Reserve History", "url": "https://www.federalreserve.gov/"}
+      ]
+    },
+    {
+      "id": "C034",
+      "claim": "You can catch a cold from cold weather.",
+      "label": "FALSE",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "CDC Common Colds", "url": "https://www.cdc.gov/getsmart/community/for-patients/common-illnesses/colds.html"}
+      ]
+    },
+    {
+      "id": "C035",
+      "claim": "The Mona Lisa was painted by Leonardo da Vinci.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Louvre Collection", "url": "https://www.louvre.fr/"}
+      ]
+    },
+    {
+      "id": "C036",
+      "claim": "Electric cars produce zero emissions.",
+      "label": "MISLEADING",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "EPA Vehicle Emissions", "url": "https://www.epa.gov/"}
+      ]
+    },
+    {
+      "id": "C037",
+      "claim": "The first person to walk on the Moon was Neil Armstrong in 1969.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NASA Apollo 11", "url": "https://www.nasa.gov/mission/apollo-11/"}
+      ]
+    },
+    {
+      "id": "C038",
+      "claim": "Humans evolved from chimpanzees.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Understanding Evolution", "url": "https://evolution.berkeley.edu/"}
+      ]
+    },
+    {
+      "id": "C039",
+      "claim": "The Suez Canal connects the Mediterranean Sea to the Red Sea.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Suez Canal Authority", "url": "https://www.suezcanal.gov.eg/"}
+      ]
+    },
+    {
+      "id": "C040",
+      "claim": "Octopuses have three hearts.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Cephalopod Biology", "url": "https://www.nature.com/"}
+      ]
+    },
+    {
+      "id": "C041",
+      "claim": "The Pope is the head of the Catholic Church.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Vatican Official Site", "url": "https://www.vatican.va/"}
+      ]
+    },
+    {
+      "id": "C042",
+      "claim": "The Black Death killed 30-60% of Europe's population.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Historical Demography", "url": "https://www.cambridge.org/"}
+      ]
+    },
+    {
+      "id": "C043",
+      "claim": "The Sun revolves around the Earth.",
+      "label": "FALSE",
+      "domain": "SCIENCE",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Solar System Dynamics", "url": "https://ssd.jpl.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C044",
+      "claim": "The human body is composed of about 60% water.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "NIH Body Water Composition", "url": "https://www.ncbi.nlm.nih.gov/"}
+      ]
+    },
+    {
+      "id": "C045",
+      "claim": "The Olympic Games originated in ancient Greece.",
+      "label": "SUPPORTED",
+      "domain": "SPORTS",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Olympic Heritage", "url": "https://olympics.com/ioc/history"}
+      ]
+    },
+    {
+      "id": "C046",
+      "claim": "The highest mountain on Earth is Mount Everest at 8,849 meters.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "National Geographic Everest", "url": "https://www.nationalgeographic.com/"}
+      ]
+    },
+    {
+      "id": "C047",
+      "claim": "The first computer was built in the 20th century.",
+      "label": "MISLEADING",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Computer History Museum", "url": "https://www.computerhistory.org/"}
+      ]
+    },
+    {
+      "id": "C048",
+      "claim": "The hydrogen bomb was first tested by the United States in 1952.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Nuclear Testing Archive", "url": "https://www.osti.gov/"}
+      ]
+    },
+    {
+      "id": "C049",
+      "claim": "The Sahara is the largest desert in the world.",
+      "label": "FALSE",
+      "domain": "GENERAL",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Antarctic Desert Facts", "url": "https://www.britannica.com/place/Antarctica"}
+      ]
+    },
+    {
+      "id": "C050",
+      "claim": "The human heart beats about 100,000 times per day.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "AHA Heart Facts", "url": "https://www.heart.org/"}
+      ]
+    },
+    {
+      "id": "C051",
+      "claim": "The Declaration of Independence was signed in 1776.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "National Archives", "url": "https://www.archives.gov/"}
+      ]
+    },
+    {
+      "id": "C052",
+      "claim": "The Internet was created in 1983 with the adoption of TCP/IP.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "IETF History", "url": "https://www.ietf.org/"}
+      ]
+    },
+    {
+      "id": "C053",
+      "claim": "The Great Barrier Reef is the largest living structure on Earth.",
+      "label": "SUPPORTED",
+      "domain": "ENVIRONMENT",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "GBRMPA", "url": "https://www.gbrmpa.gov.au/"}
+      ]
+    },
+    {
+      "id": "C054",
+      "claim": "The first powered flight was by the Wright brothers in 1903.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Smithsonian Air & Space", "url": "https://airandspace.si.edu/"}
+      ]
+    },
+    {
+      "id": "C055",
+      "claim": "The speed of sound is faster in water than in air.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Acoustics Research", "url": "https://asa.scitation.org/"}
+      ]
+    },
+    {
+      "id": "C056",
+      "claim": "The human genome contains about 20,000-25,000 protein-coding genes.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "NIH Genome Research", "url": "https://www.genome.gov/"}
+      ]
+    },
+    {
+      "id": "C057",
+      "claim": "The first artificial satellite was Sputnik 1, launched in 1957.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "NASA Sputnik", "url": "https://www.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C058",
+      "claim": "The coldest temperature ever recorded on Earth was -89.2C in Antarctica.",
+      "label": "SUPPORTED",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "WMO Weather Records", "url": "https://public.wmo.int/"}
+      ]
+    },
+    {
+      "id": "C059",
+      "claim": "The first woman to win a Nobel Prize was Marie Curie in 1903.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Nobel Prize History", "url": "https://www.nobelprize.org/"}
+      ]
+    },
+    {
+      "id": "C060",
+      "claim": "The largest ocean on Earth is the Pacific Ocean.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NOAA Ocean Facts", "url": "https://oceanservice.noaa.gov/"}
+      ]
+    },
+    {
+      "id": "C061",
+      "claim": "The human body has 206 bones in adulthood.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "NIH Skeletal System", "url": "https://www.ncbi.nlm.nih.gov/"}
+      ]
+    },
+    {
+      "id": "C062",
+      "claim": "The first web browser was created by Tim Berners-Lee in 1990.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "W3C History", "url": "https://www.w3.org/"}
+      ]
+    },
+    {
+      "id": "C063",
+      "claim": "The coldest planet in our solar system is Neptune.",
+      "label": "MISLEADING",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Planetary Science", "url": "https://solarsystem.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C064",
+      "claim": "The first human to journey into space was Yuri Gagarin in 1961.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "Roscosmos History", "url": "https://www.roscosmos.ru/"}
+      ]
+    },
+    {
+      "id": "C065",
+      "claim": "The largest land animal is the African elephant.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "WWF Species", "url": "https://www.worldwildlife.org/"}
+      ]
+    },
+    {
+      "id": "C066",
+      "claim": "The first email was sent in 1971 by Ray Tomlinson.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Internet History", "url": "https://www.internetsociety.org/"}
+      ]
+    },
+    {
+      "id": "C067",
+      "claim": "The deepest part of the ocean is the Mariana Trench at about 11,000 meters.",
+      "label": "SUPPORTED",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "NOAA Mariana Trench", "url": "https://oceanexplorer.noaa.gov/"}
+      ]
+    },
+    {
+      "id": "C068",
+      "claim": "The first computer mouse was invented by Douglas Engelbart in 1964.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "SRI International", "url": "https://www.sri.com/"}
+      ]
+    },
+    {
+      "id": "C069",
+      "claim": "The largest volcano in the solar system is Olympus Mons on Mars.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "NASA Mars Facts", "url": "https://mars.nasa.gov/"}
+      ]
+    },
+    {
+      "id": "C070",
+      "claim": "The first successful heart transplant was performed by Christiaan Barnard in 1967.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Medical History", "url": "https://www.ncbi.nlm.nih.gov/"}
+      ]
+    },
+    {
+      "id": "C071",
+      "claim": "The first digital computer was ENIAC, completed in 1945.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Computer History Museum", "url": "https://www.computerhistory.org/"}
+      ]
+    },
+    {
+      "id": "C072",
+      "claim": "The largest country by area is Russia at 17.1 million square kilometers.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "World Factbook", "url": "https://www.cia.gov/the-world-factbook/"}
+      ]
+    },
+    {
+      "id": "C073",
+      "claim": "The first human-made object to reach the Moon was Luna 2 in 1959.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Roscosmos Luna Program", "url": "https://www.roscosmos.ru/"}
+      ]
+    },
+    {
+      "id": "C074",
+      "claim": "The longest river in the world is the Nile at about 6,650 kilometers.",
+      "label": "MISLEADING",
+      "domain": "GENERAL",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Geographical Surveys", "url": "https://www.nationalgeographic.com/"}
+      ]
+    },
+    {
+      "id": "C075",
+      "claim": "The first cloned mammal was Dolly the sheep in 1996.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Roslin Institute", "url": "https://www.ed.ac.uk/roslin"}
+      ]
+    },
+    {
+      "id": "C076",
+      "claim": "The first artificial intelligence program was written in 1951 by Christopher Strachey.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "AI History", "url": "https://www.aaai.org/"}
+      ]
+    },
+    {
+      "id": "C077",
+      "claim": "The largest desert on Earth is Antarctica (cold desert).",
+      "label": "SUPPORTED",
+      "domain": "ENVIRONMENT",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Antarctic Treaty", "url": "https://www.ats.aq/"}
+      ]
+    },
+    {
+      "id": "C078",
+      "claim": "The first GPS satellite was launched in 1978.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "US Space Force GPS", "url": "https://www.spaceforce.mil/"}
+      ]
+    },
+    {
+      "id": "C079",
+      "claim": "The first nuclear power plant began operation in 1954 in the Soviet Union.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "IAEA History", "url": "https://www.iaea.org/"}
+      ]
+    },
+    {
+      "id": "C080",
+      "claim": "The first successful polio vaccine was developed by Jonas Salk in 1955.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "WHO Polio", "url": "https://www.who.int/teams/immunization-vaccines-and-biologicals/diseases"}
+      ]
+    },
+    {
+      "id": "C081",
+      "claim": "The first天气预报 was broadcast on television in 1949.",
+      "label": "UNVERIFIED",
+      "domain": "GENERAL",
+      "difficulty": "AMBIGUOUS",
+      "reference_sources": []
+    },
+    {
+      "id": "C082",
+      "claim": "The first commercial internet service provider was The World, launched in 1989.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "ISP History", "url": "https://www.internetsociety.org/"}
+      ]
+    },
+    {
+      "id": "C083",
+      "claim": "The first artificial heart transplant was performed in 1969 by Denton Cooley.",
+      "label": "SUPPORTED",
+      "domain": "HEALTH",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Medical History", "url": "https://www.ncbi.nlm.nih.gov/"}
+      ]
+    },
+    {
+      "id": "C084",
+      "claim": "The first electric car was built in 1832 by Robert Anderson.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "EV History", "url": "https://www.energy.gov/"}
+      ]
+    },
+    {
+      "id": "C085",
+      "claim": "The first photograph was taken by Joseph Nicéphore Niépce in 1826.",
+      "label": "SUPPORTED",
+      "domain": "GENERAL",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Photography History", "url": "https://www.metmuseum.org/"}
+      ]
+    },
+    {
+      "id": "C086",
+      "claim": "The first steam engine was invented by James Watt in 1769.",
+      "label": "MISLEADING",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Industrial Revolution", "url": "https://www.britannica.com/"}
+      ]
+    },
+    {
+      "id": "C087",
+      "claim": "The first telephone call was made by Alexander Graham Bell in 1876.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Bell Labs History", "url": "https://www.bell-labs.com/"}
+      ]
+    },
+    {
+      "id": "C088",
+      "claim": "The first successful gene editing in humans was performed in 2019.",
+      "label": "MISLEADING",
+      "domain": "SCIENCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Gene Therapy Research", "url": "https://www.nature.com/"}
+      ]
+    },
+    {
+      "id": "C089",
+      "claim": "The first crewed Moon landing was Apollo 11 in 1969.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "EASY",
+      "reference_sources": [
+        {"title": "NASA Apollo 11", "url": "https://www.nasa.gov/mission/apollo-11/"}
+      ]
+    },
+    {
+      "id": "C090",
+      "claim": "The first successful test of a hydrogen bomb was by the USSR in 1953.",
+      "label": "SUPPORTED",
+      "domain": "HISTORY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Nuclear Testing Archive", "url": "https://www.osti.gov/"}
+      ]
+    },
+    {
+      "id": "C091",
+      "claim": "The first self-driving car was demonstrated by Mercedes-Benz in 1995.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Autonomous Vehicle History", "url": "https://www.mercedes-benz.com/"}
+      ]
+    },
+    {
+      "id": "C092",
+      "claim": "The first 3D-printed organ was successfully transplanted in 2023.",
+      "label": "UNVERIFIED",
+      "domain": "HEALTH",
+      "difficulty": "TIME_SENSITIVE",
+      "reference_sources": []
+    },
+    {
+      "id": "C093",
+      "claim": "The first quantum computer was built by IBM in 2019.",
+      "label": "MISLEADING",
+      "domain": "TECHNOLOGY",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Quantum Computing History", "url": "https://www.ibm.com/quantum"}
+      ]
+    },
+    {
+      "id": "C094",
+      "claim": "The first successful CRISPR gene therapy was approved by the FDA in 2023.",
+      "label": "SUPPORTED",
+      "domain": "SCIENCE",
+      "difficulty": "TIME_SENSITIVE",
+      "reference_sources": [
+        {"title": "FDA Approvals", "url": "https://www.fda.gov/news-events/press-announcements"}
+      ]
+    },
+    {
+      "id": "C095",
+      "claim": "The first crewed Mars mission is scheduled for 2030.",
+      "label": "UNVERIFIED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "TIME_SENSITIVE",
+      "reference_sources": []
+    },
+    {
+      "id": "C096",
+      "claim": "The first AI to pass the Turing Test was announced in 2024.",
+      "label": "UNVERIFIED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "AMBIGUOUS",
+      "reference_sources": []
+    },
+    {
+      "id": "C097",
+      "claim": "The first fusion power plant will be operational by 2035.",
+      "label": "UNVERIFIED",
+      "domain": "SCIENCE",
+      "difficulty": "TIME_SENSITIVE",
+      "reference_sources": []
+    },
+    {
+      "id": "C098",
+      "claim": "The first universal basic income program was launched in Finland in 2017.",
+      "label": "SUPPORTED",
+      "domain": "FINANCE",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "Finnish UBI Trial", "url": "https://www.kela.fi/"}
+      ]
+    },
+    {
+      "id": "C099",
+      "claim": "The first digital currency was Bitcoin, created in 2009.",
+      "label": "MISLEADING",
+      "domain": "FINANCE",
+      "difficulty": "HARD",
+      "reference_sources": [
+        {"title": "Cryptocurrency History", "url": "https://www.bis.org/"}
+      ]
+    },
+    {
+      "id": "C100",
+      "claim": "The first 5G network was launched commercially in 2019 by South Korea.",
+      "label": "SUPPORTED",
+      "domain": "TECHNOLOGY",
+      "difficulty": "MEDIUM",
+      "reference_sources": [
+        {"title": "5G Deployment", "url": "https://www.3gpp.org/"}
+      ]
+    }
+  ]
+}
